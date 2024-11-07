@@ -1,0 +1,7 @@
+*.zip
+*.pdf
+*.docx
+.DS_Store
+[csed538]proposal/
+myenv/
+project_samples/
