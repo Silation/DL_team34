@@ -1,5 +1,5 @@
 from concorde.tsp import TSPSolver
-
+from random_node_generator import *
 
 def read_tsp_file(file_path):
     # coordinates에 (x, y) tuple 저장
@@ -20,6 +20,7 @@ def read_tsp_file(file_path):
                 start_reading = True
 
     return coordinates
+
 
 # 폴더 경로
 folder_path = 'DL_TestCase/'
