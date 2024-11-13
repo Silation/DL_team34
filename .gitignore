@@ -1,6 +1,8 @@
 *.zip
 *.pdf
 *.docx
+*.res
+*.sol
 .DS_Store
 '[csed538]proposal'/
 myenv/
