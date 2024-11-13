@@ -3,6 +3,8 @@
 *.docx
 *.res
 *.sol
+*.csv
+dataset/*.csv
 .DS_Store
 '[csed538]proposal'/
 myenv/
