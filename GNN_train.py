@@ -16,8 +16,10 @@ class TSPGNN(nn.Module):
         self.conv1 = GCNConv(2, 64)  # 노드 입력: (x, y) 좌표
         self.conv2 = GCNConv(64, 32)
         self.edge_mlp = nn.Sequential(
-            nn.Linear(32 * 2 + 1, 16), nn.ReLU(), nn.Linear(16, 1)
-        )  # edge 예측을 위한 MLP
+            nn.Linear(66, 16),  # 입력 크기 수정 (32 + 32 + 2 = 66)
+            nn.ReLU(),
+            nn.Linear(16, 2)   # [is_in_tour 확률, 거리 예측]
+        )
 
     def forward(self, x, edge_index, edge_attr):
         # 노드 임베딩 학습
