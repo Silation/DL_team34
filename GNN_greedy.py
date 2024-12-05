@@ -76,6 +76,10 @@ def build_greedy_tour(node_file, edge_file):
         distance = ((pos1[0] - pos2[0])**2 + (pos1[1] - pos2[1])**2)**0.5
         graph.add_edge(node1, node2, weight=distance)
 
+    # 최종 경로 길이 계산
+    total_length = sum(nx.get_edge_attributes(graph, "weight").values())
+    print(f"Final tour length: {total_length:.4f}")
+
     # 결과 저장
     final_edges = list(graph.edges(data=True))
     return graph, final_edges, original_edges

@@ -8,19 +8,22 @@ import math
 import shutil
 
 def read_tsp_file(file_path):
-    # coordinates에 (x, y) tuple 저장
+    """
+    TSPLIB 형식의 .tsp 파일을 읽어 좌표 데이터를 반환합니다.
+    """
     coordinates = []
     start_reading = False
     
     with open(file_path, 'r') as file:
         for line in file:
-            
             if line.strip() == "EOF":
                 break
             
             if start_reading:
-                _, x, y = line.split()
-                coordinates.append((int(x), int(y)))
+                parts = line.strip().split()
+                if len(parts) == 3:
+                    _, x, y = parts
+                    coordinates.append((float(x), float(y)))
 
             if line.strip() == "NODE_COORD_SECTION":
                 start_reading = True
@@ -82,5 +85,63 @@ def make_test_dataset(data_amount=100, folder_path='pt_larger_dataset'):
         graph_data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr)
         torch.save(graph_data, f'{folder_path}/tsp_graph_data_{i}.pt')
     
+def process_tsp_files(tsp_folder_path, output_folder_path):
+    """
+    주어진 폴더 내 모든 .tsp 파일을 읽어 .pt 형식으로 변환합니다.
+    """
+    if not os.path.exists(output_folder_path):
+        os.makedirs(output_folder_path)
 
-make_test_dataset(data_amount=9000)
+    for tsp_file in os.listdir(tsp_folder_path):
+        if tsp_file.endswith(".tsp"):
+            file_path = os.path.join(tsp_folder_path, tsp_file)
+            coordinates = read_tsp_file(file_path)
+
+            solver = TSPSolver.from_data(
+                [x for x, y in coordinates],
+                [y for x, y in coordinates],
+                norm="EUC_2D"
+            )
+
+            try:
+                solution = solver.solve()
+            except Exception as e:
+                print(f"Error solving TSP for {tsp_file}: {e}")
+                continue
+
+            optimal_edges = set()
+            for node in range(len(solution.tour) - 1):
+                from_node, to_node = solution.tour[node], solution.tour[node + 1]
+                optimal_edges.add((from_node, to_node))
+
+            x = torch.tensor(coordinates, dtype=torch.float)
+            edge_index = []
+            edge_attr = []
+
+            for from_node in range(len(coordinates)):
+                for to_node in range(len(coordinates)):
+                    if from_node != to_node:
+                        edge_index.append([from_node, to_node])
+                        distance = math.sqrt(
+                            (coordinates[from_node][0] - coordinates[to_node][0]) ** 2 +
+                            (coordinates[from_node][1] - coordinates[to_node][1]) ** 2
+                        )
+                        is_in_tour = 1 if (from_node, to_node) in optimal_edges else 0
+                        edge_attr.append([is_in_tour, distance])
+
+            edge_index = torch.tensor(edge_index, dtype=torch.long).t().contiguous()
+            edge_attr = torch.tensor(edge_attr, dtype=torch.float)
+
+            graph_data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr)
+            output_file = os.path.join(output_folder_path, f"{os.path.splitext(tsp_file)[0]}.pt")
+            torch.save(graph_data, output_file)
+            print(f"Saved {output_file}")
+
+
+
+# 사용 예제
+tsp_folder_path = "DL_TestCase"  # .tsp 파일이 있는 폴더 경로
+output_folder_path = "pt_new_dataset_test"       # 변환된 .pt 파일을 저장할 폴더 경로
+process_tsp_files(tsp_folder_path, output_folder_path)
+
+#make_test_dataset(data_amount=9000)
