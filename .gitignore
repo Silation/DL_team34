@@ -8,7 +8,6 @@
 pt_dataset/
 pt_dataset_test/
 pt_new_dataset/
-pt_new_dataset_test/
 dataset/*.csv
 .DS_Store
 '[csed538]proposal'/

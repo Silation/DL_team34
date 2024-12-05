@@ -8,7 +8,7 @@ import os
 import time
 from tqdm import tqdm
 
-data_folder = "pt_dataset"
+data_folder = "pt_new_dataset"
 
 # GNN 모델 정의
 class TSPGNN(nn.Module):
